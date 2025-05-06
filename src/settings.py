@@ -5,6 +5,8 @@ import pygame
 # Отступ от центра фундамента для остановки миксера
 TARGET_OFFSET = 30
 
+CONCRETE_PER_MIXER = 10  # 10% бетона за заливку
+
 # Пути
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, '../assets')

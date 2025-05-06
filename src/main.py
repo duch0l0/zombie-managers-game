@@ -48,6 +48,10 @@ class Game:
         self.zombie_spawn_interval = 60
         self.mixer_cooldown = 0
 
+        self.mixers = pygame.sprite.Group()
+        self.mixer_spawn_timer = 0
+        self.mixer_spawn_interval = FPS * 10  # Новая машина каждые 10 секунд
+
     def spawn_zombie(self):
         side = random.randint(0, 3)
         if side == 0:  # Верх
@@ -87,6 +91,12 @@ class Game:
                     self.player.shoot(mouse_x, mouse_y)
 
     def update(self):
+        # Спавн новых миксерав
+        self.mixer_spawn_timer += 1
+        if self.mixer_spawn_timer >= self.mixer_spawn_interval:
+            self.spawn_mixer()
+            self.mixer_spawn_timer = 0
+
         # Спавн зомби
         self.zombie_spawn_timer += 1
         if self.zombie_spawn_timer >= self.zombie_spawn_interval:
@@ -125,25 +135,18 @@ class Game:
                 hits = pygame.sprite.spritecollide(bullet, self.zombies, True)
                 if hits:
                     bullet.kill()
+    
+    def spawn_mixer(self):
+        mixer = MixerTruck()
+        mixer.foundation = self.foundation
+        self.mixers.add(mixer)
+        self.all_sprites.add(mixer)
 
     def draw(self):
         self.screen.fill(BLACK)
         
         # Отрисовка всех спрайтов
         self.all_sprites.draw(self.screen)
-        
-        # Отладочная линия маршрута миксера (можно удалить после теста)
-        if hasattr(self, 'mixer_truck') and hasattr(self, 'foundation'):
-            pygame.draw.line(
-                self.screen, 
-                (0, 255, 0), 
-                self.mixer_truck.rect.center, 
-                (
-                    self.foundation.rect.centerx + TARGET_OFFSET, 
-                    self.foundation.rect.centery + TARGET_OFFSET
-                ), 
-                2
-            )
             
         # Отрисовка пуль
         if hasattr(self.player, 'bullets'):
