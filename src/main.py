@@ -141,7 +141,14 @@ class Game:
 
     def draw(self):
         self.screen.fill(BLACK)
+    
+        # Отрисовка всех спрайтов
+        self.all_sprites.draw(self.screen)
         
+        # Отрисовка сообщений зомби
+        for zombie in self.zombies:
+            zombie.draw_message(self.screen)  # Новый метод
+
         # Отрисовка всех спрайтов
         self.all_sprites.draw(self.screen)
             
