@@ -37,8 +37,8 @@ class MixerTruck(pygame.sprite.Sprite):
 
     def _move_to_target(self):
         """Движение к фундаменту с фиксированным радиусом остановки"""
-        if not self.foundation:
-            return
+        if not hasattr(self, 'foundation') or not self.foundation:
+            return  # Ждем установки цели
 
         target_pos = self.foundation.rect.center
         current_pos = self.rect.center

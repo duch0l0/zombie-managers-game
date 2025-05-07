@@ -3,7 +3,7 @@ import math
 import pygame
 
 # Отступ от центра фундамента для остановки миксера
-TARGET_OFFSET = 30
+TARGET_OFFSET = 70
 
 CONCRETE_PER_MIXER = 10  # 10% бетона за заливку
 

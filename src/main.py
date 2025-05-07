@@ -30,9 +30,9 @@ class Game:
         
         # Игровые объекты (правильный порядок инициализации)
         self.foundation = Foundation()
+        self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         self.mixer_truck = MixerTruck()
         self.mixer_truck.set_target(self.foundation)  # устанавливаем цель
-        self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         
         # Связывание объектов
         self.foundation.mixer = self.mixer_truck
@@ -112,11 +112,8 @@ class Game:
         # Проверка столкновений
         for zombie in self.zombies:
             if pygame.sprite.collide_rect(zombie, self.foundation):
-                self.foundation.health -= 1
+                self.foundation.health -= 10
                 zombie.kill()
-        
-        if random.random() < 0.01:  # 1% шанс каждого кадра
-            self.mixer_truck.start_pouring()
         
         self.all_sprites.update()
 
@@ -138,7 +135,7 @@ class Game:
     
     def spawn_mixer(self):
         mixer = MixerTruck()
-        mixer.foundation = self.foundation
+        mixer.set_target(self.foundation)  # Явно устанавливаем цель
         self.mixers.add(mixer)
         self.all_sprites.add(mixer)
 
