@@ -15,7 +15,7 @@ class ZombieManager(pygame.sprite.Sprite):
         self.health = 100
         
         # Система сообщений
-        self.messages = ["Нужен отчёт!", "Где KPI?", "Cold call!", "Маркетинг!", "Дедлайн!", "Срочно!", "Ревью!", "Бюджет!"]
+        self.messages = ["Дай скидку!", "Где KPI?", "Ишак тебя понюхал!", "Никита не ходит на встречи!", "Дедлайн!", "АБН не встанет!", "Ревью!", "Бюджет!"]
         self.current_message = random.choice(self.messages)
         self.message_alpha = 0    # Прозрачность (0-255)
         self.message_timer = 0    # Таймер показа
