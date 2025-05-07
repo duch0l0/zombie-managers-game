@@ -26,6 +26,8 @@ BLUE = (0, 0, 255)
 # Персонажи
 PLAYER_SPEED = 5
 ZOMBIE_SPEED = 2
+GREEN = (0, 255, 0)
+GRAY = (150, 150, 150)
 
 # Уровни сложности
 LEVELS = {
