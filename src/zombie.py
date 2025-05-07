@@ -1,18 +1,28 @@
 import pygame
 import random
 from settings import *
+from settings import LEVELS, current_level  # Добавляем эту строку
 
 class ZombieManager(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, zombie_type="manager"):
         super().__init__()
-        # Графика
+        
+        from settings import current_level, LEVELS  # Импортируем здесь
+        
+        config = ZOMBIE_TYPES[zombie_type]
+        level_mod = LEVELS[current_level]
+        
+        self.speed = config["speed"] * level_mod["speed_multiplier"]
+        self.health = config["health"] * (1 + 0.1 * (current_level-1))
+        self.type = zombie_type
+        config = ZOMBIE_TYPES[zombie_type]
+        
         self.image = pygame.Surface((30, 30))
-        self.image.fill(RED)
+        self.image.fill(config["color"])
         self.rect = self.image.get_rect(center=(x, y))
         
-        # Механика движения
-        self.speed = ZOMBIE_SPEED
-        self.health = 100
+        self.health = config["health"]
+        self.speed = config["speed"] * LEVELS[current_level]["speed_multiplier"]
         
         # Система сообщений
         self.messages = ["Дай скидку!", "Где KPI?", "Ишак тебя понюхал!", "Никита не ходит на встречи!", "Дедлайн!", "АБН не встанет!", "Ревью!", "Бюджет!"]
