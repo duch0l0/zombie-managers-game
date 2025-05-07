@@ -2,6 +2,7 @@ import os
 import sys
 import pygame
 import random
+import math
 from settings import *
 from player import Player
 from zombie import ZombieManager
@@ -31,6 +32,9 @@ class Game:
         # Добавление объектов
         self.all_sprites.add(self.foundation, self.player)
         
+        # Система частиц
+        self.particles = []
+        
         # Система уровней
         self.current_level = 1
         self.zombies_killed = 0
@@ -54,6 +58,7 @@ class Game:
         mixer.set_target(self.foundation)
         self.all_sprites.add(mixer)
         self.mixers.add(mixer)
+        self._create_sparks(mixer.rect.center, (255, 200, 100), 30)
 
     def spawn_zombie(self):
         if len(self.zombies) >= LEVELS[self.current_level]["max_zombies"]:
@@ -77,6 +82,35 @@ class Game:
         self.all_sprites.add(zombie)
         self.zombies.add(zombie)
 
+    def _create_sparks(self, pos, color, count=20):
+        """Создает эффект искр"""
+        for _ in range(count):
+            angle = random.uniform(0, math.pi * 2)
+            speed = random.uniform(0.5, 3)
+            self.particles.append({
+                "x": pos[0], "y": pos[1],
+                "vx": math.cos(angle) * speed,
+                "vy": math.sin(angle) * speed,
+                "color": color,
+                "life": random.randint(20, 40),
+                "size": random.uniform(1, 4)
+            })
+
+    def _create_ring(self, pos, color, radius=30):
+        """Создает кольцевой эффект"""
+        for angle in range(0, 360, 15):
+            rad = math.radians(angle)
+            self.particles.append({
+                "x": pos[0], "y": pos[1],
+                "vx": math.cos(rad) * 1.5,
+                "vy": math.sin(rad) * 1.5,
+                "color": color,
+                "life": 50,
+                "size": 2,
+                "growing": True,
+                "max_size": radius
+            })
+
     def run(self):
         while self.running:
             self.clock.tick(FPS)
@@ -92,6 +126,14 @@ class Game:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 self.player.shoot(mouse_x, mouse_y)
+                
+                # Эффект для улучшенных пуль
+                if self.player.bullet_damage > 15:
+                    self._create_sparks(
+                        (mouse_x, mouse_y), 
+                        (255, 100, 0), 
+                        15
+                    )
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_u:
@@ -100,24 +142,37 @@ class Game:
                     if event.key == pygame.K_1:
                         if self.upgrade_system.apply_upgrade("bullet_damage"):
                             self._show_notification("Урон пуль +!")
+                            self._create_sparks(
+                                self.player.rect.center, 
+                                (255, 100, 0),
+                                30
+                            )
                     elif event.key == pygame.K_2:
                         if self.upgrade_system.apply_upgrade("concrete_health"):
                             self._show_notification("Прочность +!")
+                            self._create_ring(
+                                self.foundation.rect.center,
+                                (0, 200, 255),
+                                50
+                            )
                     elif event.key == pygame.K_3:
                         if self.upgrade_system.apply_upgrade("mixer_speed"):
                             self._show_notification("Скорость МКР +!")
                             for mixer in self.mixers:
                                 mixer.speed = MixerTruck.base_speed
+                                self._create_sparks(
+                                    mixer.rect.center,
+                                    (255, 200, 100),
+                                    20
+                                )
 
     def _show_notification(self, message):
         """Показывает уведомление над фундаментом"""
         font = pygame.font.SysFont('Arial', 48, bold=True)
         text = font.render(message, True, (255, 215, 0))  # Золотой цвет
         
-        # Позиция над фундаментом
-        notification_y = self.foundation.rect.top - 80
-        if notification_y < 20:  # Не выходить за верх экрана
-            notification_y = 20
+        # Позиция над фундаментом с проверкой границ
+        notification_y = max(20, self.foundation.rect.top - 80)
         
         self.notification = {
             "text": text,
@@ -127,13 +182,29 @@ class Game:
                 text.get_width(),
                 text.get_height()
             ),
-            "timer": 90  # 1.5 секунды
+            "timer": 90  # 1.5 секунды при FPS=60
         }
 
     def update(self):
         if self.show_upgrades:
             return
             
+        # Обновление частиц
+        for p in self.particles[:]:
+            if p.get("growing", False):
+                p["size"] += 0.2
+                if "max_size" in p and p["size"] > p["max_size"]:
+                    p["growing"] = False
+            else:
+                p["size"] *= 0.98  # Постепенное уменьшение
+            
+            p["x"] += p["vx"]
+            p["y"] += p["vy"]
+            p["life"] -= 1
+            
+            if p["life"] <= 0:
+                self.particles.remove(p)
+        
         # Спавн зомби
         self.zombie_spawn_timer += 1
         if self.zombie_spawn_timer >= self.zombie_spawn_interval:
@@ -168,6 +239,18 @@ class Game:
                 self.zombies_killed += len(hits)
                 self.upgrade_system.add_points(10 * len(hits))
                 
+                # Эффект попадания
+                for _ in range(10):
+                    self.particles.append({
+                        "x": bullet.rect.centerx,
+                        "y": bullet.rect.centery,
+                        "vx": random.uniform(-2, 2),
+                        "vy": random.uniform(-2, 2),
+                        "color": (255, 50, 0),
+                        "life": random.randint(15, 30),
+                        "size": random.uniform(2, 4)
+                    })
+                
                 if self.zombies_killed >= LEVELS[self.current_level]["required_kills"]:
                     self.next_level()
         
@@ -185,7 +268,14 @@ class Game:
         self.current_level += 1
         self.zombies_killed = 0
         self.zombie_spawn_interval = LEVELS[self.current_level]["zombie_spawn_rate"]
+        
+        # Эффект перехода уровня
         self._show_notification(f"УРОВЕНЬ {self.current_level}!")
+        self._create_ring(
+            self.foundation.rect.center,
+            (100, 255, 100),
+            70
+        )
 
     def draw(self):
         self.screen.fill(BLACK)
@@ -194,26 +284,50 @@ class Game:
         self.all_sprites.draw(self.screen)
         self.player.bullets.draw(self.screen)
         
-        # 2. Оповещения (поверх объектов)
+        # 2. Отрисовка частиц
+        for p in self.particles:
+            alpha = min(255, p["life"] * 6)
+            if isinstance(p["color"], tuple):
+                color = (*p["color"], alpha)
+            else:
+                color = p["color"] + (alpha,)
+            
+            pygame.draw.circle(
+                self.screen, color,
+                (int(p["x"]), int(p["y"])),
+                int(p["size"])
+            )
+        
+        # 3. Оповещения (поверх частиц)
         if self.notification:
             alpha = min(255, self.notification["timer"] * 3)
+            
+            # Фон для читаемости
+            bg_rect = self.notification["rect"].inflate(30, 15)
+            pygame.draw.rect(
+                self.screen, (0, 0, 0, alpha//2),
+                bg_rect, border_radius=10
+            )
+            pygame.draw.rect(
+                self.screen, (255, 215, 0, alpha//3),
+                bg_rect, 3, border_radius=10
+            )
+            
+            # Текст уведомления
             self.notification["text"].set_alpha(alpha)
-            
-            # Фон для лучшей читаемости
-            bg_rect = self.notification["rect"].inflate(20, 10)
-            pygame.draw.rect(self.screen, (0, 0, 0, alpha//2), bg_rect, border_radius=5)
-            pygame.draw.rect(self.screen, (255, 215, 0, alpha//3), bg_rect, 2, border_radius=5)
-            
-            self.screen.blit(self.notification["text"], self.notification["rect"])
+            self.screen.blit(
+                self.notification["text"],
+                self.notification["rect"]
+            )
         
-        # 3. Сообщения зомби
+        # 4. Сообщения зомби
         for zombie in self.zombies:
             zombie.draw_message(self.screen)
         
-        # 4. Интерфейс
+        # 5. Интерфейс
         self._draw_ui()
         
-        # 5. Меню улучшений (самое верхнее)
+        # 6. Меню улучшений (самое верхнее)
         if self.show_upgrades:
             self._draw_upgrade_menu()
         
@@ -235,6 +349,8 @@ class Game:
         overlay = pygame.Surface((220, 150), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         self.screen.blit(overlay, (SCREEN_WIDTH - 230, 10))
+        
+        # Отрисовка пунктов меню
         self.upgrade_system.draw_menu(self.screen)
 
 if __name__ == "__main__":
