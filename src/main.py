@@ -28,13 +28,13 @@ class Game:
         self.zombie_spawn_timer = 0
         self.zombie_spawn_interval = 60  # Спавн каждую секунду (при FPS=60)
         
-        # Игровые объекты (ПРАВИЛЬНЫЙ ПОРЯДОК ИНИЦИАЛИЗАЦИИ)
+        # Игровые объекты (правильный порядок инициализации)
         self.foundation = Foundation()
         self.mixer_truck = MixerTruck()
-        self.mixer_truck.set_target(self.foundation)  # Устанавливаем
+        self.mixer_truck.set_target(self.foundation)  # устанавливаем цель
         self.player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         
-        # Связываем объекты
+        # Связывание объектов
         self.foundation.mixer = self.mixer_truck
         self.mixer_truck.foundation = self.foundation
         
@@ -50,7 +50,7 @@ class Game:
 
         self.mixers = pygame.sprite.Group()
         self.mixer_spawn_timer = 0
-        self.mixer_spawn_interval = FPS * 10  # Новая машина каждые 10 секунд
+        self.mixer_spawn_interval = FPS * 10  # новая машина каждые 10 секунд
 
     def spawn_zombie(self):
         side = random.randint(0, 3)
@@ -86,12 +86,12 @@ class Game:
             
             # Обработка клика мыши (только если событие - нажатие кнопки)
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Левая кнопка мыши
+                if event.button == 1:  # левая кнопка мыши
                     mouse_x, mouse_y = pygame.mouse.get_pos()
                     self.player.shoot(mouse_x, mouse_y)
 
     def update(self):
-        # Спавн новых миксерав
+        # Спавн новых миксеров
         self.mixer_spawn_timer += 1
         if self.mixer_spawn_timer >= self.mixer_spawn_interval:
             self.spawn_mixer()
@@ -115,14 +115,14 @@ class Game:
                 self.foundation.health -= 1
                 zombie.kill()
         
-        if random.random() < 0.01:  # 1% шанс каждый кадр
+        if random.random() < 0.01:  # 1% шанс каждого кадра
             self.mixer_truck.start_pouring()
         
         self.all_sprites.update()
 
         # Проверка столкновений пуль с зомби
         for bullet in self.player.bullets:
-            hits = pygame.sprite.spritecollide(bullet, self.zombies, True)  # True - удалять зомби
+            hits = pygame.sprite.spritecollide(bullet, self.zombies, True)  # True — удалять зомби
             if hits:
                 bullet.kill()
                 print(f"Убито зомби! Осталось: {len(self.zombies)}")
