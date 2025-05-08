@@ -11,6 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = PLAYER_SPEED
         self.bullet_damage = 10  # Базовый урон
         self.bullets = pygame.sprite.Group()
+        self.game = None  # Добавляем ссылку на игру
 
     def update(self):
         keys = pygame.key.get_pressed()

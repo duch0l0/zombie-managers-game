@@ -91,3 +91,7 @@ SPEED_MULTIPLIERS = {
 def get_distance(x1, y1, x2, y2):
     """Безопасный расчет расстояния между точками"""
     return math.sqrt((x2 - x1)**2 + (y2 - y1)**2) or 1.0  # Избегаем деления на 0
+
+# Звуковые настройки
+SOUNDS_DIR = os.path.join(ASSETS_DIR, 'sounds')
+DEFAULT_SOUND_VOLUME = 0.7

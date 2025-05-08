@@ -9,6 +9,7 @@ from zombie import ZombieManager
 from mixer_truck import MixerTruck
 from foundation import Foundation
 from upgrades import UpgradeSystem
+from sounds import SoundSystem
 
 class Game:
     def __init__(self):
@@ -52,6 +53,9 @@ class Game:
         
         # Первый миксер
         self.spawn_mixer()
+
+        self.sound = SoundSystem()
+        self.sound_enabled = True  # Флаг включения звука
 
     def spawn_mixer(self):
         mixer = MixerTruck()
@@ -166,6 +170,12 @@ class Game:
                                     20
                                 )
 
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                self.player.shoot(mouse_x, mouse_y)
+                if self.sound_enabled:
+                    self.sound.play('shot')  # Звук выстрела
+
     def _show_notification(self, message):
         """Показывает уведомление над фундаментом"""
         font = pygame.font.SysFont('Arial', 48, bold=True)
@@ -236,6 +246,8 @@ class Game:
             hits = pygame.sprite.spritecollide(bullet, self.zombies, True)
             if hits:
                 bullet.kill()
+                if self.sound_enabled:
+                    self.sound.play('hit', volume=0.5)  # Звук попадания (тише выстрела)
                 self.zombies_killed += len(hits)
                 self.upgrade_system.add_points(10 * len(hits))
                 
