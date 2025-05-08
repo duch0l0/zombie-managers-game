@@ -6,7 +6,7 @@ from settings import *
 class ZombieManager(pygame.sprite.Sprite):
     def __init__(self, x, y, zombie_type="manager"):
         super().__init__()
-        self.scale = 1.0
+        self.scale = 1.2
         self.type = zombie_type
         self.config = ZOMBIE_TYPES[zombie_type]
         
@@ -25,9 +25,9 @@ class ZombieManager(pygame.sprite.Sprite):
         # Хитбокс и rect
         self.rect = self.image.get_rect(center=(x, y))
         hitbox_scale = {
-            'manager': 0.7,
-            'marketing': 0.8,
-            'hr': 0.6
+            'manager': 0.5,
+            'marketing': 0.5,
+            'hr': 0.5
         }[self.type]
         self.hitbox = self.rect.inflate(
             -self.rect.width*(1-hitbox_scale),
