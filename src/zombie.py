@@ -18,7 +18,7 @@ class ZombieManager(pygame.sprite.Sprite):
         
         # Настройки анимации
         self.current_frame = 0
-        self.animation_speed = 0.1
+        self.animation_speed = 0.2
         self.direction = 'down'
         self.image = self.animations[self.direction][0]
         
