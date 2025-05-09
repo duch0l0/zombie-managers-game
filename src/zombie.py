@@ -47,34 +47,36 @@ class ZombieManager(pygame.sprite.Sprite):
         self.message_timer = 0
         self.message_cooldown = 0
 
-    def load_animations(self):
-        """Загружает анимации для текущего типа зомби"""
-        base_path = os.path.join(ASSETS_DIR, 'sprites', 'zombies', self.type)
-        directions = ['down', 'up', 'left', 'right']
-        
-        for direction in directions:
-            for i in range(1, 11):  # 10 кадров анимации
-                img_path = os.path.join(base_path, direction, f'{i}.png')
-                try:
-                    image = pygame.image.load(img_path).convert_alpha()
-                    orig_size = image.get_size()
-                    scaled_size = (int(orig_size[0] * self.scale), int(orig_size[1] * self.scale))
-                    image = pygame.transform.scale(image, scaled_size)
-                    self.animations[direction].append(image)
-                except:
-                    print(f"Ошибка загрузки: {img_path}")
-                    fallback = pygame.Surface((int(30 * self.scale), int(30 * self.scale)), pygame.SRCALPHA)
-                    pygame.draw.rect(fallback, self.config["color"], (0, 0, int(30 * self.scale), int(30 * self.scale)))
-                    self.animations[direction].append(fallback)
-
-    def animate(self):
+    def animate(self):  # <- Новый метод
         animation = self.animations[self.direction]
         self.current_frame += self.animation_speed
         if self.current_frame >= len(animation):
             self.current_frame = 0
         self.image = animation[int(self.current_frame)]
 
+    def load_animations(self):
+        """Загружает анимации для всех направлений"""
+        base_path = os.path.join(ASSETS_DIR, 'sprites', 'zombies', self.type)
+        directions = ['down', 'up', 'left', 'right']  # Добавьте эту строку
+        
+        for direction in directions:
+            for i in range(1, 11):  # 10 кадров анимации
+                img_path = os.path.join(base_path, direction, f'{i}.png')
+                try:
+                    image = pygame.image.load(img_path).convert_alpha()
+                    self.animations[direction].append(image)
+                except Exception as e:
+                    print(f"Ошибка загрузки: {img_path} - {e}")
+                    # Создаем запасной спрайт
+                    fallback = pygame.Surface((32, 32), pygame.SRCALPHA)
+                    pygame.draw.rect(fallback, self.config["color"], (0, 0, 32, 32))
+                    self.animations[direction].append(fallback)
+
     def update(self):
+
+        self.animate()  # Теперь этот вызов будет работать
+        self._update_messages()
+
         # Движение к центру
         dx = SCREEN_WIDTH//2 - self.rect.centerx
         dy = SCREEN_HEIGHT//2 - self.rect.centery
@@ -122,14 +124,14 @@ class ZombieManager(pygame.sprite.Sprite):
             text = font.render(self.current_message, True, (255, 215, 0))
             text.set_alpha(self.message_alpha)
             
-            # Позиционирование текста
-            text_y_offset = -15 - self.rect.height//4
+            # Фиксированный отступ от центра зомби
+            text_y_offset = -25  # Настраиваемое значение
             text_pos = (
                 self.rect.centerx - text.get_width()//2 + random.randint(-2, 2),
-                self.rect.y + text_y_offset + random.randint(-1, 1)
+                self.rect.centery + text_y_offset + random.randint(-1, 1)  # Используем centery вместо y
             )
             
-            # Тень
+            # Тень (оставляем без изменений)
             shadow = font.render(self.current_message, True, (0, 0, 0))
             shadow.set_alpha(self.message_alpha // 2)
             surface.blit(shadow, (text_pos[0] + 2, text_pos[1] + 2))

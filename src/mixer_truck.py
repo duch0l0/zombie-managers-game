@@ -8,6 +8,9 @@ class MixerTruck(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.Surface((50, 30))
+        self.animations = self._load_animations()
+        self.image = self.animations['down'][0]
+        self.rect = self.image.get_rect()
         self.image.fill((255, 165, 0))
         self.rect = self.image.get_rect()
         self.speed = self.__class__.base_speed  # Используем классовую скорость
@@ -76,3 +79,20 @@ class MixerTruck(pygame.sprite.Sprite):
         else:
             self.rect.x = -self.rect.width
         self.kill()
+    
+    def _load_animations(self):
+        animations = {'down': [], 'up': [], 'left': [], 'right': []}
+        for direction in animations.keys():
+            for i in range(1, 5):  # 4 кадра анимации
+                try:
+                    img = pygame.image.load(
+                        f"assets/sprites/mixer_truck/{direction}/{i}.png"
+                    ).convert_alpha()
+                    animations[direction].append(img)
+                except:
+                    # Запасной вариант
+                    surf = pygame.Surface((50, 30), pygame.SRCALPHA)
+                    color = (255, 165, 0) if direction == 'down' else (200, 140, 0)
+                    pygame.draw.rect(surf, color, (0, 0, 50, 30))
+                    animations[direction].append(surf)
+        return animations
