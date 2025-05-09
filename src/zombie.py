@@ -6,7 +6,7 @@ from settings import *
 class ZombieManager(pygame.sprite.Sprite):
     def __init__(self, x, y, zombie_type="manager"):
         super().__init__()
-        self.scale = 1.2
+        self.scale = 2
         self.type = zombie_type
         self.config = ZOMBIE_TYPES[zombie_type]
         
@@ -73,14 +73,18 @@ class ZombieManager(pygame.sprite.Sprite):
                     self.animations[direction].append(fallback)
 
     def update(self):
+        # 1. Проверяем наличие фундамента
+        if not hasattr(self, 'foundation') or not self.foundation:
+            return
 
-        self.animate()  # Теперь этот вызов будет работать
-        self._update_messages()
-
-        # Движение к центру
-        dx = SCREEN_WIDTH//2 - self.rect.centerx
-        dy = SCREEN_HEIGHT//2 - self.rect.centery
+        # 2. Движение к центру фундамента (не экрана!)
+        target_x, target_y = self.foundation.rect.center
+        dx = target_x - self.rect.centerx
+        dy = target_y - self.rect.centery
         distance = max(1, (dx**2 + dy**2)**0.5)
+        
+        # 3. Отладочный вывод (можно убрать после фикса)
+        print(f"{self.type} Zombie: distance={distance:.1f}, hit_distance={self.hit_distance}")
         
         if distance > self.hit_distance:
             # Определение направления
@@ -89,18 +93,18 @@ class ZombieManager(pygame.sprite.Sprite):
             else:
                 self.direction = 'down' if dy > 0 else 'up'
 
-            # Плавное замедление при приближении
-            current_speed = self.speed * min(1.0, distance/100)
-            
-            self.rect.x += dx/distance * current_speed
-            self.rect.y += dy/distance * current_speed
+            # Движение без плавного замедления (для точного попадания)
+            self.rect.x += dx/distance * self.speed
+            self.rect.y += dy/distance * self.speed
             self.hitbox.center = self.rect.center
         else:
             # Атака фундамента
+            print(f"{self.type} Zombie attacking foundation!")  # Логирование
             self.foundation.health -= 10
             self.kill()
             return
         
+        # 4. Обновляем анимацию и сообщения (один раз за кадр)
         self.animate()
         self._update_messages()
 

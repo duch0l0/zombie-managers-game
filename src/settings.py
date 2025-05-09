@@ -55,27 +55,30 @@ current_level = 1  # Текущий уровень
 # Типы зомби (цвет, здоровье, скорость, фразы)
 ZOMBIE_TYPES = {
     "manager": {
-        "base_width": 32,  # Новый параметр
-        "base_height": 32, # Новый параметр
+        "hit_distance": 45,
+        "base_width": 32,  
+        "base_height": 32, 
         "color": RED,
         "health": 100,
         "speed": 2.0,
         "messages": ["Нужен отчёт!", "Где KPI?", "Cold call!"]
     },
     "marketing": {
-        "base_width": 32,  # Новый параметр
-        "base_height": 32, # Новый параметр
+        "hit_distance": 45,
+        "base_width": 32,  
+        "base_height": 32, 
         "color": (148, 0, 211),  # Фиолетовый
         "health": 70,
-        "speed": 3.0,
+        "speed": 1.0,
         "messages": ["ВирАльность!", "Охват падает!", "Нужен контент!"]
     },
     "hr": {
-        "base_width": 32,  # Новый параметр
-        "base_height": 32, # Новый параметр
+        "hit_distance": 45,
+        "base_width": 32, 
+        "base_height": 32, 
         "color": (255, 192, 203),  # Розовый
         "health": 150,
-        "speed": 1.5,
+        "speed": 3,
         "messages": ["Командообразование!", "Тимбилдинг!", "HR-бренд!"]
     }
 }
