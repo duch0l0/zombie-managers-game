@@ -16,6 +16,7 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Zombie Managers vs Concrete Defense")
+        self.background = self._load_background()
         self.clock = pygame.time.Clock()
         self.running = True
         self.font = pygame.font.SysFont('Arial', 24)
@@ -267,9 +268,29 @@ class Game:
         
         self._show_notification(f"УРОВЕНЬ {self.current_level}!")
         self._create_ring(self.foundation.rect.center, (100, 255, 100), 70)
+    
+
+    def _load_background(self):
+        try:
+            bg_path = os.path.join(ASSETS_DIR, 'sprites', 'background.png')
+            if not os.path.exists(bg_path):
+                return None
+                
+            # Загружаем и конвертируем поверхность
+            background = pygame.image.load(bg_path).convert_alpha()
+            return pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        except Exception as e:
+            print(f"Ошибка загрузки фона: {e}")
+            return None
 
     def draw(self):
-        self.screen.fill(BLACK)
+
+        # Отрисовка фона
+        if self.background:
+            self.screen.blit(self.background, (0, 0))
+        else:
+            self.screen.fill(BLACK)
+            self.screen.fill(BLACK)
         
         # Отрисовка игровых объектов
         self.all_sprites.draw(self.screen)
