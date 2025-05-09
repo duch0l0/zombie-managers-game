@@ -68,8 +68,8 @@ ZOMBIE_TYPES = {
         "base_width": 32,  
         "base_height": 32, 
         "color": (148, 0, 211),  # Фиолетовый
-        "health": 70,
-        "speed": 1.0,
+        "health": 300,
+        "speed": 1,
         "messages": ["ВирАльность!", "Охват падает!", "Нужен контент!"]
     },
     "hr": {
@@ -77,7 +77,7 @@ ZOMBIE_TYPES = {
         "base_width": 32, 
         "base_height": 32, 
         "color": (255, 192, 203),  # Розовый
-        "health": 150,
+        "health": 200,
         "speed": 3,
         "messages": ["Командообразование!", "Тимбилдинг!", "HR-бренд!"]
     }

@@ -12,6 +12,17 @@ class Foundation(pygame.sprite.Sprite):
         self.concrete_amount = 0  # 0-100%
         self.damage_overlay = pygame.Surface((100, 100), pygame.SRCALPHA)
         
+        # Настройки полосы прогресса
+        self.progress_height = 10  # Высота полосы
+        self.progress_y = 8       # Позиция по Y (вверху)
+        self.progress_color = (70, 70, 255)  # Синий цвет заполнения
+        self.progress_bg_color = (40, 40, 40)  # Цвет фона полосы
+        self.progress_border_color = (100, 100, 100)  # Цвет рамки
+        
+        # Настройки текста
+        self.progress_font = pygame.font.SysFont('Arial', 22, bold=True)
+        self.text_color = (200, 200, 255)  # Светло-синий текст
+        
     def _load_image(self):
         try:
             image = pygame.image.load(os.path.join(ASSETS_DIR, 'sprites', 'foundation.png')).convert_alpha()
@@ -25,14 +36,17 @@ class Foundation(pygame.sprite.Sprite):
     def update(self):
         self.image = self.original_image.copy()
         
-        # Индикатор бетона (серый)
+        # Полоса прогресса с рамкой
         if self.concrete_amount > 0:
-            progress = pygame.Surface((100 * self.concrete_amount/100, 100), pygame.SRCALPHA)
-            progress.fill((100, 100, 100, 180))
-            self.image.blit(progress, (0, 0))
-        
-        # Индикатор повреждений (красный)
-        damage_alpha = int(200 * (1 - self.health/self.max_health))
-        if damage_alpha > 0:
-            self.damage_overlay.fill((255, 0, 0, damage_alpha))
-            self.image.blit(self.damage_overlay, (0, 0))
+            # Рамка полосы прогресса
+            pygame.draw.rect(self.image, self.progress_border_color, 
+                           (0, self.progress_y, 100, self.progress_height), 1)
+            
+            # Фон полосы (незаполненная часть)
+            pygame.draw.rect(self.image, self.progress_bg_color, 
+                           (0, self.progress_y, 100, self.progress_height))
+            
+            # Заполненная часть
+            progress_width = 100 * self.concrete_amount / 100
+            pygame.draw.rect(self.image, self.progress_color, 
+                           (0, self.progress_y, progress_width, self.progress_height))

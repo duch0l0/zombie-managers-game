@@ -18,6 +18,8 @@ class MixerTruck(pygame.sprite.Sprite):
         self.pouring = False
         self.pour_time = 0
         self._spawn_off_screen()
+        self.leaving = False  # Добавляем новое состояние
+        self.leave_speed = 3  # Скорость отъезда
 
     def _spawn_off_screen(self):
         side = random.choice(['top', 'right', 'bottom', 'left'])
@@ -69,16 +71,46 @@ class MixerTruck(pygame.sprite.Sprite):
         self._exit_site()
 
     def _exit_site(self):
-        side = random.choice(['top', 'right', 'bottom', 'left'])
-        if side == 'top':
-            self.rect.y = -self.rect.height
-        elif side == 'right':
-            self.rect.x = SCREEN_WIDTH
-        elif side == 'bottom':
-            self.rect.y = SCREEN_HEIGHT
+        """Начинает процесс отъезда вместо мгновенного удаления"""
+        self.leaving = True
+        self.leave_direction = random.choice(['top', 'right', 'bottom', 'left'])
+        
+        # Устанавливаем начальную позицию для отъезда
+        if self.leave_direction == 'top':
+            self.target_y = -self.rect.height
+        elif self.leave_direction == 'right':
+            self.target_x = SCREEN_WIDTH + self.rect.width
+        elif self.leave_direction == 'bottom':
+            self.target_y = SCREEN_HEIGHT + self.rect.height
+        else:  # left
+            self.target_x = -self.rect.width
+
+    def update(self):
+        if self.leaving:
+            self._handle_leaving()
+        elif self.pouring:
+            self._handle_pouring()
         else:
-            self.rect.x = -self.rect.width
-        self.kill()
+            self._move_to_target()
+
+    def _handle_leaving(self):
+        """Обрабатывает анимацию отъезда"""
+        if self.leave_direction == 'top':
+            self.rect.y -= self.leave_speed
+            if self.rect.bottom <= 0:
+                self.kill()
+        elif self.leave_direction == 'right':
+            self.rect.x += self.leave_speed
+            if self.rect.left >= SCREEN_WIDTH:
+                self.kill()
+        elif self.leave_direction == 'bottom':
+            self.rect.y += self.leave_speed
+            if self.rect.top >= SCREEN_HEIGHT:
+                self.kill()
+        else:  # left
+            self.rect.x -= self.leave_speed
+            if self.rect.right <= 0:
+                self.kill()
     
     def _load_animations(self):
         animations = {'down': [], 'up': [], 'left': [], 'right': []}
